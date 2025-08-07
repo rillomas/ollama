@@ -71,6 +71,7 @@ void vk_init(char* vk_lib_path, char* cap_lib_path, vk_init_resp_t *resp) {
       {1, "cap_free", (void *)&resp->ch.cap_free},
 #endif
       {0, "vkGetPhysicalDeviceProperties", (void *)&resp->ch.vkGetPhysicalDeviceProperties},
+      {0, "vkGetPhysicalDeviceProperties2", (void *)&resp->ch.vkGetPhysicalDeviceProperties2},
       {0, "vkEnumerateDeviceExtensionProperties", (void *)&resp->ch.vkEnumerateDeviceExtensionProperties},
       {0, "vkCreateInstance", (void *)&resp->ch.vkCreateInstance},
       {0, "vkEnumeratePhysicalDevices", (void *)&resp->ch.vkEnumeratePhysicalDevices},
@@ -205,6 +206,19 @@ int vk_check_flash_attention(vk_handle_t rh, int i) {
   return 0;
 }
 
+static void printUuid(const uint8_t* uuid) {
+    for (int i = 0; i < VK_UUID_SIZE; ++i) {
+        printf("%02x", uuid[i]);
+        if (i < VK_UUID_SIZE - 1) {
+            // Optional: print hyphens for standard UUID format
+            if (i == 3 || i == 5 || i == 7 || i == 9) {
+                printf("-");
+            }
+        }
+    }
+    printf("\n");
+}
+
 void vk_check_vram(vk_handle_t rh, int i, mem_info_t *resp) {
   VkInstance instance = rh.vk;
   uint32_t deviceCount = rh.num_devices;
@@ -241,6 +255,20 @@ void vk_check_vram(vk_handle_t rh, int i, mem_info_t *resp) {
   VkPhysicalDeviceMemoryBudgetPropertiesEXT physical_device_memory_budget_properties;
   physical_device_memory_budget_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT;
   physical_device_memory_budget_properties.pNext = NULL;
+
+  VkPhysicalDeviceProperties2 device_props2 = {};
+  device_props2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
+
+  VkPhysicalDeviceIDProperties id_props = {};
+  id_props.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES;
+
+  device_props2.pNext = &id_props;
+  (*rh.vkGetPhysicalDeviceProperties2)(devices[i], &device_props2);
+  printf("Device Name: %s\n", device_props2.properties.deviceName);
+  printf("Device UUID: ");
+  printUuid(id_props.deviceUUID);
+  printf("Driver UUID: ");
+  printUuid(id_props.driverUUID);
 
   VkPhysicalDeviceMemoryProperties2 device_memory_properties;
   device_memory_properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2;
