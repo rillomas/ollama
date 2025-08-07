@@ -15,12 +15,27 @@ const (
 	hipErrorNoDevice = 100
 )
 
+// type hipDevicePropMinimal struct {
+// 	Name        [256]byte
+// 	unused1     [140]byte
+// 	GcnArchName [256]byte // gfx####
+// 	iGPU        int       // Doesn't seem to actually report correctly
+// 	unused2     [128]byte
+// }
+
+// Refer to hipDeviceProp_tR0600 in hip_runtime_api.h from HIP SDK
 type hipDevicePropMinimal struct {
 	Name        [256]byte
-	unused1     [140]byte
+	uuid        [16]byte
+	luid        [8]byte
+	unused1     [80]byte
+	major       int32
+	minor       int32
+	unused2     [28]byte
+	iGPU        int32
+	unused3     [760]byte
 	GcnArchName [256]byte // gfx####
-	iGPU        int       // Doesn't seem to actually report correctly
-	unused2     [128]byte
+	unused4     [56]byte
 }
 
 // Wrap the amdhip64.dll library for GPU discovery
@@ -45,7 +60,7 @@ func NewHipLib() (*HipLib, error) {
 	if err != nil {
 		return nil, err
 	}
-	hl.hipGetDeviceProperties, err = windows.GetProcAddress(hl.dll, "hipGetDeviceProperties")
+	hl.hipGetDeviceProperties, err = windows.GetProcAddress(hl.dll, "hipGetDevicePropertiesR0600")
 	if err != nil {
 		return nil, err
 	}
