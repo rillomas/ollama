@@ -140,20 +140,20 @@ func initCudaHandles() *cudaHandles {
 		}
 	}
 
-	cudartLibPaths := FindGPULibs(CudartMgmtName, cudartMgmtPatterns)
-	if len(cudartLibPaths) > 0 {
-		deviceCount, cudart, libPath, err := loadCUDARTMgmt(cudartLibPaths)
-		if cudart != nil {
-			slog.Debug("detected GPUs", "library", libPath, "count", deviceCount)
-			cHandles.cudart = cudart
-			cHandles.deviceCount = deviceCount
-			cudartLibPath = libPath
-			return cHandles
-		}
-		if err != nil {
-			bootstrapErrors = append(bootstrapErrors, err)
-		}
-	}
+	// cudartLibPaths := FindGPULibs(CudartMgmtName, cudartMgmtPatterns)
+	// if len(cudartLibPaths) > 0 {
+	// 	deviceCount, cudart, libPath, err := loadCUDARTMgmt(cudartLibPaths)
+	// 	if cudart != nil {
+	// 		slog.Debug("detected GPUs", "library", libPath, "count", deviceCount)
+	// 		cHandles.cudart = cudart
+	// 		cHandles.deviceCount = deviceCount
+	// 		cudartLibPath = libPath
+	// 		return cHandles
+	// 	}
+	// 	if err != nil {
+	// 		bootstrapErrors = append(bootstrapErrors, err)
+	// 	}
+	// }
 
 	return cHandles
 }
